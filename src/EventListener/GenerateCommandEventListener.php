@@ -1,23 +1,19 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\EventListener;
+namespace Krlove\EloquentModelGenerator\EventListener;
 
-use Doctrine\DBAL\Exception;
 use Illuminate\Console\Events\CommandStarting;
-use Ray\EloquentModelGenerator\TypeRegistry;
+use Krlove\EloquentModelGenerator\TypeRegistry;
 
 class GenerateCommandEventListener
 {
     private const SUPPORTED_COMMANDS = [
-        'ray:generate:model',
-        'ray:generate:models',
+        'krlove:generate:model',
+        'krlove:generate:models',
     ];
 
-    public function __construct(private readonly TypeRegistry $typeRegistry) {}
+    public function __construct(private TypeRegistry $typeRegistry) {}
 
-    /**
-     * @throws Exception
-     */
     public function handle(CommandStarting $event): void
     {
         if (!in_array($event->command, self::SUPPORTED_COMMANDS)) {

@@ -1,30 +1,27 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Provider;
+namespace Krlove\EloquentModelGenerator\Provider;
 
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Ray\EloquentModelGenerator\Command\GenerateModelCommand;
-use Ray\EloquentModelGenerator\Command\GenerateModelsCommand;
-use Ray\EloquentModelGenerator\EventListener\GenerateCommandEventListener;
-use Ray\EloquentModelGenerator\Generator;
-use Ray\EloquentModelGenerator\Processor\ClassDefinitionProcessor;
-use Ray\EloquentModelGenerator\Processor\CustomPrimaryKeyProcessor;
-use Ray\EloquentModelGenerator\Processor\ModelPropertyProcessor;
-use Ray\EloquentModelGenerator\Processor\FieldProcessor;
-use Ray\EloquentModelGenerator\Processor\NamespaceProcessor;
-use Ray\EloquentModelGenerator\Processor\RelationProcessor;
-use Ray\EloquentModelGenerator\Processor\SoftDeleteProcessor;
-use Ray\EloquentModelGenerator\Processor\TableTimestampsProcessor;
-use Ray\EloquentModelGenerator\Processor\UsesTraitProcessor;
-use Ray\EloquentModelGenerator\TypeRegistry;
+use Krlove\EloquentModelGenerator\Command\GenerateModelCommand;
+use Krlove\EloquentModelGenerator\Command\GenerateModelsCommand;
+use Krlove\EloquentModelGenerator\EventListener\GenerateCommandEventListener;
+use Krlove\EloquentModelGenerator\Generator;
+use Krlove\EloquentModelGenerator\Processor\CustomPrimaryKeyProcessor;
+use Krlove\EloquentModelGenerator\Processor\CustomPropertyProcessor;
+use Krlove\EloquentModelGenerator\Processor\FieldProcessor;
+use Krlove\EloquentModelGenerator\Processor\NamespaceProcessor;
+use Krlove\EloquentModelGenerator\Processor\RelationProcessor;
+use Krlove\EloquentModelGenerator\Processor\TableNameProcessor;
+use Krlove\EloquentModelGenerator\TypeRegistry;
 
 class GeneratorServiceProvider extends ServiceProvider
 {
     public const PROCESSOR_TAG = 'eloquent_model_generator.processor';
 
-    public function register(): void
+    public function register()
     {
         $this->commands([
             GenerateModelCommand::class,
@@ -38,12 +35,9 @@ class GeneratorServiceProvider extends ServiceProvider
             FieldProcessor::class,
             NamespaceProcessor::class,
             RelationProcessor::class,
-            ModelPropertyProcessor::class,
-            ClassDefinitionProcessor::class,
+            CustomPropertyProcessor::class,
+            TableNameProcessor::class,
             CustomPrimaryKeyProcessor::class,
-            SoftDeleteProcessor::class,
-            TableTimestampsProcessor::class,
-            UsesTraitProcessor::class,
         ], self::PROCESSOR_TAG);
 
         $this->app->bind(Generator::class, function ($app) {
@@ -51,12 +45,8 @@ class GeneratorServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot(): void
+    public function boot()
     {
         Event::listen(CommandStarting::class, [GenerateCommandEventListener::class, 'handle']);
-
-        $this->publishes([
-            __DIR__ . '/../Config/eloquent-model-generator.php' => config_path('eloquent-model-generator.php'),
-        ]);
     }
 }

@@ -1,20 +1,18 @@
 <?php
 
-namespace Ray\EloquentModelGenerator;
+namespace Krlove\EloquentModelGenerator;
 
-use Exception;
 use IteratorAggregate;
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Exception\GeneratorException;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
-use Ray\EloquentModelGenerator\Processor\ProcessorInterface;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\EloquentModelGenerator\Processor\ProcessorInterface;
 
 class Generator
 {
     /**
      * @var ProcessorInterface[]
      */
-    protected iterable $processors;
+    protected array $processors;
 
     /**
      * @param ProcessorInterface[]|IteratorAggregate $processors
@@ -34,13 +32,8 @@ class Generator
 
         $this->sortProcessorsByPriority();
 
-        try {
-            foreach ($this->processors as $processor) {
-                $processor->process($model, $config);
-            }
-
-        } catch (Exception $e) {
-            throw new GeneratorException($e->getMessage());
+        foreach ($this->processors as $processor) {
+            $processor->process($model, $config);
         }
 
         return $model;

@@ -1,31 +1,25 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Processor;
+namespace Krlove\EloquentModelGenerator\Processor;
 
-use Doctrine\DBAL\Exception;
 use Illuminate\Database\DatabaseManager;
-use Ray\EloquentModelGenerator\Model\DocBlockModel;
-use Ray\EloquentModelGenerator\Model\PropertyModel;
-use Ray\EloquentModelGenerator\Model\VirtualPropertyModel;
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Helper\Prefix;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
-use Ray\EloquentModelGenerator\TypeRegistry;
+use Krlove\CodeGenerator\Model\DocBlockModel;
+use Krlove\CodeGenerator\Model\PropertyModel;
+use Krlove\CodeGenerator\Model\VirtualPropertyModel;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Helper\Prefix;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\EloquentModelGenerator\TypeRegistry;
 
 class FieldProcessor implements ProcessorInterface
 {
-    public function __construct(private readonly DatabaseManager $databaseManager, private readonly TypeRegistry $typeRegistry)
-    {
-    }
-
-    /**
-     * @throws Exception
-     */
+    public function __construct(private DatabaseManager $databaseManager, private TypeRegistry $typeRegistry) {}
+    
     public function process(EloquentModel $model, Config $config): void
     {
         $schemaManager = $this->databaseManager->connection($config->getConnection())->getDoctrineSchemaManager();
 
-        $tableDetails = $schemaManager->introspectTable(Prefix::add($model->getTableName()));
+        $tableDetails = $schemaManager->listTableDetails(Prefix::add($model->getTableName()));
         $primaryColumnNames = $tableDetails->getPrimaryKey() ? $tableDetails->getPrimaryKey()->getColumns() : [];
 
         $columnNames = [];
@@ -35,7 +29,7 @@ class FieldProcessor implements ProcessorInterface
                 $this->typeRegistry->resolveType($column->getType()->getName())
             ));
 
-            if (! in_array($column->getName(), $primaryColumnNames)) {
+            if (!in_array($column->getName(), $primaryColumnNames)) {
                 $columnNames[] = $column->getName();
             }
         }
@@ -43,7 +37,7 @@ class FieldProcessor implements ProcessorInterface
         $fillableProperty = new PropertyModel('fillable');
         $fillableProperty->setAccess('protected')
             ->setValue($columnNames)
-            ->setDocBlock(new DocBlockModel('The attributes that are mass assignable.', '@var array<string>'));
+            ->setDocBlock(new DocBlockModel('@var array'));
         $model->addProperty($fillableProperty);
     }
 

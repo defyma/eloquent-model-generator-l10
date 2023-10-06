@@ -1,64 +1,45 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Command;
+namespace Krlove\EloquentModelGenerator\Command;
 
-use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\DatabaseManager;
-use Ray\EloquentModelGenerator\Exception\GeneratorException;
-use Ray\EloquentModelGenerator\Generator;
-use Ray\EloquentModelGenerator\Helper\Prefix;
+use Krlove\EloquentModelGenerator\Generator;
+use Krlove\EloquentModelGenerator\Helper\Prefix;
 use Symfony\Component\Console\Input\InputArgument;
-use Illuminate\Contracts\Console\PromptsForMissingInput as PromptsForMissingInputContract;
 
-class GenerateModelCommand extends Command implements PromptsForMissingInputContract
+class GenerateModelCommand extends Command
 {
     use GenerateCommandTrait;
 
-    protected $name = 'ray:generate:model';
+    protected $name = 'krlove:generate:model';
 
-    protected $description = 'Generate a model class based on a database table. The model name will be the same as the table name.';
-
-    public function __construct(
-        private readonly Generator       $generator,
-        private readonly DatabaseManager $databaseManager)
+    public function __construct(private Generator $generator, private DatabaseManager $databaseManager)
     {
         parent::__construct();
     }
 
-    /**
-     */
-    public function handle(): void
+    public function handle()
     {
-        try {
-            $config = $this->createConfig();
-            $config->setClassName($this->argument('model-name'));
-            Prefix::setPrefix($this->databaseManager->connection($config->getConnection())->getTablePrefix());
+        $config = $this->createConfig();
+        $config->setClassName($this->argument('class-name'));
+        Prefix::setPrefix($this->databaseManager->connection($config->getConnection())->getTablePrefix());
 
-            $model = $this->generator->generateModel($config);
-            $this->saveModel($model);
+        $model = $this->generator->generateModel($config);
+        $this->saveModel($model);
 
-            $this->output->writeln(sprintf('Model %s generated', $model->getName()->getName()));
-        } catch (Exception $e) {
-            $this->error($e->getMessage());
-        }
-
+        $this->output->writeln(sprintf('Model %s generated', $model->getName()->getName()));
     }
 
-    protected function getArguments(): array
+    protected function getArguments()
     {
         return [
-            ['model-name', InputArgument::REQUIRED, 'Model name'],
+            ['class-name', InputArgument::REQUIRED, 'Model class name'],
         ];
     }
 
-    protected function getOptions(): array
+    protected function getOptions()
     {
         return $this->getCommonOptions();
-    }
-
-    protected function getStub()
-    {
-        // TODO: Implement getStub() method.
     }
 }

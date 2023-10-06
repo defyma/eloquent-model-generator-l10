@@ -1,8 +1,7 @@
 <?php
 
-namespace Ray\EloquentModelGenerator;
+namespace Krlove\EloquentModelGenerator;
 
-use Doctrine\DBAL\Exception;
 use Illuminate\Database\DatabaseManager;
 
 class TypeRegistry
@@ -30,19 +29,13 @@ class TypeRegistry
         'enum'         => 'string',
     ];
 
-    /**
-     * @throws Exception
-     */
-    public function __construct(private readonly DatabaseManager $databaseManager)
+    public function __construct(private DatabaseManager $databaseManager)
     {
         foreach ($this->types as $sqlType => $phpType) {
             $this->registerDoctrineTypeMapping($sqlType, $phpType);
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function registerType(string $sqlType, string $phpType, string $connection = null): void
     {
         $this->types[$sqlType] = $phpType;
@@ -55,13 +48,9 @@ class TypeRegistry
         return array_key_exists($type, $this->types) ? $this->types[$type] : 'mixed';
     }
 
-    /**
-     * @throws Exception
-     */
     private function registerDoctrineTypeMapping(string $sqlType, string $phpType, string $connection = null): void
     {
-        $dbConnection = $this->databaseManager->connection($connection)->getDoctrineConnection();
-        $dbPlatform = $dbConnection->getDatabasePlatform();
-        $dbPlatform->registerDoctrineTypeMapping($sqlType, $phpType);
+        $manager = $this->databaseManager->connection($connection)->getDoctrineSchemaManager();
+        $manager->getDatabasePlatform()->registerDoctrineTypeMapping($sqlType, $phpType);
     }
 }

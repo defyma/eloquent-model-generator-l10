@@ -1,32 +1,24 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Processor;
+namespace Krlove\EloquentModelGenerator\Processor;
 
-use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Schema\SchemaException;
 use Illuminate\Database\DatabaseManager;
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Helper\Prefix;
-use Ray\EloquentModelGenerator\Model\DocBlockModel;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
-use Ray\EloquentModelGenerator\Model\PropertyModel;
-use Ray\EloquentModelGenerator\TypeRegistry;
+use Krlove\CodeGenerator\Model\DocBlockModel;
+use Krlove\CodeGenerator\Model\PropertyModel;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Helper\Prefix;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\EloquentModelGenerator\TypeRegistry;
 
 class CustomPrimaryKeyProcessor implements ProcessorInterface
 {
-    public function __construct(private readonly DatabaseManager $databaseManager, private readonly TypeRegistry $typeRegistry)
-    {
-    }
+    public function __construct(private DatabaseManager $databaseManager, private TypeRegistry $typeRegistry) {}
 
-    /**
-     * @throws Exception
-     * @throws SchemaException
-     */
     public function process(EloquentModel $model, Config $config): void
     {
         $schemaManager = $this->databaseManager->connection($config->getConnection())->getDoctrineSchemaManager();
 
-        $tableDetails = $schemaManager->introspectTable(Prefix::add($model->getTableName()));
+        $tableDetails = $schemaManager->listTableDetails(Prefix::add($model->getTableName()));
         $primaryKey = $tableDetails->getPrimaryKey();
         if ($primaryKey === null) {
             return;
@@ -58,7 +50,7 @@ class CustomPrimaryKeyProcessor implements ProcessorInterface
             $model->addProperty($keyTypeProperty);
         }
 
-        if (! $column->getAutoincrement()) {
+        if (!$column->getAutoincrement()) {
             $autoincrementProperty = new PropertyModel('incrementing', 'public', false);
             $autoincrementProperty->setDocBlock(
                 new DocBlockModel('Indicates if the IDs are auto-incrementing.', '', '@var bool')

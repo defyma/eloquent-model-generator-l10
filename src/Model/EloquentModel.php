@@ -1,22 +1,22 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Model;
+namespace Krlove\EloquentModelGenerator\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo as EloquentBelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany as EloquentBelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany as EloquentHasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne as EloquentHasOne;
 use Illuminate\Support\Str;
-use Ray\EloquentModelGenerator\Exception\GeneratorException;
-use Ray\EloquentModelGenerator\Helper\EmgHelper;
-use Ray\EloquentModelGenerator\Model\Traits\ClassTypeModifierTrait;
-use ReflectionObject;
+use Krlove\CodeGenerator\Model\ClassModel;
+use Krlove\CodeGenerator\Model\DocBlockModel;
+use Krlove\CodeGenerator\Model\MethodModel;
+use Krlove\CodeGenerator\Model\VirtualPropertyModel;
+use Krlove\EloquentModelGenerator\Exception\GeneratorException;
+use Krlove\EloquentModelGenerator\Helper\EmgHelper;
 
 class EloquentModel extends ClassModel
 {
-    use ClassTypeModifierTrait;
-
-    protected string $tableName = '';
+    protected string $tableName;
 
     public function setTableName(string $tableName): self
     {
@@ -30,33 +30,6 @@ class EloquentModel extends ClassModel
         return $this->tableName;
     }
 
-    /**
-     * @throws GeneratorException
-     */
-    public function addReturnType(Relation $relation): string
-    {
-        if ($relation instanceof HasOne) {
-            $docBlock = sprintf(': \%s', EloquentHasOne::class);
-
-        } elseif ($relation instanceof HasMany) {
-            $docBlock = sprintf(': \%s', EloquentHasMany::class);
-
-        } elseif ($relation instanceof BelongsTo) {
-            $docBlock = sprintf(': \%s', EloquentBelongsTo::class);
-
-        } elseif ($relation instanceof BelongsToMany) {
-            $docBlock = sprintf(': \%s', EloquentBelongsToMany::class);
-
-        } else {
-            throw new GeneratorException('Relation not supported.');
-        }
-
-        return $docBlock;
-    }
-
-    /**
-     * @throws GeneratorException
-     */
     public function addRelation(Relation $relation): void
     {
         $relationClass = EmgHelper::getClassNameByTableName($relation->getTableName());
@@ -81,13 +54,12 @@ class EloquentModel extends ClassModel
 
             $virtualPropertyType = sprintf('%s[]', $relationClass);
         } else {
-            throw new GeneratorException('Relation not supported.');
+            throw new GeneratorException('Relation not supported');
         }
 
         $method = new MethodModel($name);
         $method->setBody($this->createRelationMethodBody($relation));
         $method->setDocBlock(new DocBlockModel($docBlock));
-        $method->setReturnType($this->addReturnType($relation));
 
         $this->addMethod($method);
         $this->addProperty(new VirtualPropertyModel($name, $virtualPropertyType));
@@ -95,7 +67,7 @@ class EloquentModel extends ClassModel
 
     protected function createRelationMethodBody(Relation $relation): string
     {
-        $reflectionObject = new ReflectionObject($relation);
+        $reflectionObject = new \ReflectionObject($relation);
         $name = Str::camel($reflectionObject->getShortName());
 
         $arguments = [
@@ -148,8 +120,8 @@ class EloquentModel extends ClassModel
         $array = array_reverse($array);
         $milestone = false;
         foreach ($array as $key => &$item) {
-            if (! $milestone) {
-                if (! is_string($item)) {
+            if (!$milestone) {
+                if (!is_string($item)) {
                     unset($array[$key]);
                 } else {
                     $milestone = true;

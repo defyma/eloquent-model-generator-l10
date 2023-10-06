@@ -1,9 +1,9 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Processor;
+namespace Krlove\EloquentModelGenerator\Processor;
 
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
 
 interface ProcessorInterface
 {

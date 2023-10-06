@@ -1,29 +1,21 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Processor;
+namespace Krlove\EloquentModelGenerator\Processor;
 
-use Doctrine\DBAL\Exception;
 use Illuminate\Database\DatabaseManager;
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Exception\GeneratorException;
-use Ray\EloquentModelGenerator\Helper\EmgHelper;
-use Ray\EloquentModelGenerator\Helper\Prefix;
-use Ray\EloquentModelGenerator\Model\BelongsTo;
-use Ray\EloquentModelGenerator\Model\BelongsToMany;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
-use Ray\EloquentModelGenerator\Model\HasMany;
-use Ray\EloquentModelGenerator\Model\HasOne;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Helper\EmgHelper;
+use Krlove\EloquentModelGenerator\Helper\Prefix;
+use Krlove\EloquentModelGenerator\Model\BelongsTo;
+use Krlove\EloquentModelGenerator\Model\BelongsToMany;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\EloquentModelGenerator\Model\HasMany;
+use Krlove\EloquentModelGenerator\Model\HasOne;
 
 class RelationProcessor implements ProcessorInterface
 {
-    public function __construct(private readonly DatabaseManager $databaseManager)
-    {
-    }
+    public function __construct(private DatabaseManager $databaseManager) {}
 
-    /**
-     * @throws GeneratorException
-     * @throws Exception
-     */
     public function process(EloquentModel $model, Config $config): void
     {
         $schemaManager = $this->databaseManager->connection($config->getConnection())->getDoctrineSchemaManager();

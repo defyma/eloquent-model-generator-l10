@@ -1,63 +1,49 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Command;
+namespace Krlove\EloquentModelGenerator\Command;
 
-use Doctrine\DBAL\Exception;
+use Illuminate\Config\Repository as AppConfig;
 use Illuminate\Console\Command;
 use Illuminate\Database\DatabaseManager;
-use Ray\EloquentModelGenerator\Exception\GeneratorException;
-use Ray\EloquentModelGenerator\Generator;
-use Ray\EloquentModelGenerator\Helper\EmgHelper;
-use Ray\EloquentModelGenerator\Helper\Prefix;
+use Krlove\EloquentModelGenerator\Generator;
+use Krlove\EloquentModelGenerator\Helper\EmgHelper;
+use Krlove\EloquentModelGenerator\Helper\Prefix;
 use Symfony\Component\Console\Input\InputOption;
 
 class GenerateModelsCommand extends Command
 {
     use GenerateCommandTrait;
 
-    protected $name = 'ray:generate:models';
-    protected $description = 'Generate all model classes based on a database table. You can skip tables with --skip-table option.';
+    protected $name = 'krlove:generate:models';
 
-    public function __construct(private readonly Generator $generator, private readonly DatabaseManager $databaseManager)
+    public function __construct(private Generator $generator, private DatabaseManager $databaseManager)
     {
         parent::__construct();
     }
 
-    /**
-     * @throws GeneratorException
-     * @throws \Exception
-     */
-    public function handle(): void
+    public function handle()
     {
-        try {
-            $config = $this->createConfig();
-            Prefix::setPrefix($this->databaseManager->connection($config->getConnection())->getTablePrefix());
+        $config = $this->createConfig();
+        Prefix::setPrefix($this->databaseManager->connection($config->getConnection())->getTablePrefix());
 
-            $schemaManager = $this->databaseManager->connection($config->getConnection())->getDoctrineSchemaManager();
-            $tables = $schemaManager->listTables();
-            $skipTables = $this->option('skip-table');
-            if (count($skipTables) === 1 && str_contains($skipTables[0], ',')) {
-                $skipTables = explode(',', $skipTables[0]);
-            }
-            foreach ($tables as $table) {
-                $tableName = Prefix::remove($table->getName());
-                if (in_array($tableName, $skipTables)) {
-                    continue;
-                }
-
-                $config->setClassName(EmgHelper::getClassNameByTableName($tableName));
-                $model = $this->generator->generateModel($config);
-                $this->saveModel($model);
-
-                $this->output->writeln(sprintf('Model %s generated', $model->getName()->getName()));
+        $schemaManager = $this->databaseManager->connection($config->getConnection())->getDoctrineSchemaManager();
+        $tables = $schemaManager->listTables();
+        $skipTables = $this->option('skip-table');
+        foreach ($tables as $table) {
+            $tableName = Prefix::remove($table->getName());
+            if (in_array($tableName, $skipTables)) {
+                continue;
             }
 
-        } catch (Exception $e) {
-            throw new GeneratorException($e->getMessage());
+            $config->setClassName(EmgHelper::getClassNameByTableName($tableName));
+            $model = $this->generator->generateModel($config);
+            $this->saveModel($model);
+
+            $this->output->writeln(sprintf('Model %s generated', $model->getName()->getName()));
         }
     }
 
-    protected function getOptions(): array
+    protected function getOptions()
     {
         return array_merge(
             $this->getCommonOptions(),

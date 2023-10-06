@@ -1,10 +1,10 @@
 <?php
 
-namespace Ray\EloquentModelGenerator\Processor;
+namespace Krlove\EloquentModelGenerator\Processor;
 
-use Ray\EloquentModelGenerator\Model\NamespaceModel;
-use Ray\EloquentModelGenerator\Config\Config;
-use Ray\EloquentModelGenerator\Model\EloquentModel;
+use Krlove\CodeGenerator\Model\NamespaceModel;
+use Krlove\EloquentModelGenerator\Config\Config;
+use Krlove\EloquentModelGenerator\Model\EloquentModel;
 
 class NamespaceProcessor implements ProcessorInterface
 {

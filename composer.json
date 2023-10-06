@@ -1,7 +1,7 @@
 {
     "name": "defyma/eloquent-model-generator-l10",
     "description": "Eloquent Model Generator",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "license": "MIT",
     "autoload": {
         "psr-4": {

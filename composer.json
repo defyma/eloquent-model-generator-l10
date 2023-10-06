@@ -1,7 +1,7 @@
 {
     "name": "defyma/eloquent-model-generator-l10",
     "description": "Eloquent Model Generator",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -16,9 +16,9 @@
     "require": {
         "php": "^8.0",
         "illuminate/database": "^10.0",
-        "illuminate/support": "^9.0",
-        "illuminate/config": "^9.0",
-        "illuminate/console": "^9.0",
+        "illuminate/support": "^10.0",
+        "illuminate/config": "^10.0",
+        "illuminate/console": "^10.0",
         "doctrine/dbal": "^3.0",
         "krlove/code-generator": "^1.0"
     },
